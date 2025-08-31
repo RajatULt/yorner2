@@ -110,12 +110,12 @@ const PassengerManagement: React.FC<PassengerManagementProps> = ({ bookingId, on
     for (const passenger of passengers) {
       if (!passenger.firstName || !passenger.lastName || !passenger.dateOfBirth || 
           !passenger.passportNumber || !passenger.passportExpiryDate) {
-        alert('Please fill all required fields for all passengers');
+        alert(`Please fill all required fields for passenger: ${passenger.firstName || 'Unnamed'} ${passenger.lastName || ''}`);
         return false;
       }
       
       if (!passenger.isEligible) {
-        alert(`Passenger ${passenger.firstName} ${passenger.lastName} has insufficient passport validity (less than 6 months)`);
+        alert(`Passenger ${passenger.firstName} ${passenger.lastName} has insufficient passport validity. Passport must be valid for at least 6 months from travel date.`);
         return false;
       }
     }

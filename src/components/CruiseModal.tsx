@@ -235,12 +235,12 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                     title={`${cruise.name} - Cruise Details`}
                     type="cruise"
                   />
-                <button
-                  onClick={() => setCurrentStep('selection')}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
-                >
-                  Book This Cruise
-                </button>
+                  <button
+                    onClick={() => setCurrentStep('selection')}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+                  >
+                    Book This Cruise
+                  </button>
                 </div>
               </div>
             </div>

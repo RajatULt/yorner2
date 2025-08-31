@@ -266,12 +266,20 @@ const HotelModal: React.FC<HotelModalProps> = ({ hotel, onClose, onBookingSucces
               
               {/* Action Button */}
               <div className="text-center">
+                <div className="flex gap-4 justify-center">
+                  <PDFExport
+                    data={hotel}
+                    filename={`${hotel.name.replace(/\s+/g, '_')}_Details.pdf`}
+                    title={`${hotel.name} - Hotel Details`}
+                    type="hotel"
+                  />
                 <button
                   onClick={() => setCurrentStep('selection')}
                   className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
                 >
                   Book This Hotel
                 </button>
+                </div>
               </div>
             </div>
           )}

@@ -563,52 +563,6 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         </Modal>
 
         {/* CMS Management Modal */}
-        <Modal
-          title="CMS & Social Media Management"
-          open={showCMSModal}
-          onCancel={() => setShowCMSModal(false)}
-          footer={null}
-          width={900}
-        >
-          <div className="space-y-6">
-            <Tabs
-              items={[
-                {
-                  key: 'blog',
-                  label: 'Blog Management',
-                  children: (
-                    <div className="space-y-4">
-                      <div className="flex gap-2 mb-4">
-                        <Button type="primary">Create New Post</Button>
-                        <Button>Manage Categories</Button>
-                        <Button>SEO Settings</Button>
-                      </div>
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <p className="text-gray-600">Recent blog posts and content management tools would be displayed here.</p>
-                      </div>
-                    </div>
-                  )
-                },
-                {
-                  key: 'social',
-                  label: 'Social Media',
-                  children: (
-                    <div className="space-y-4">
-                      <div className="flex gap-2 mb-4">
-                        <Button type="primary">Schedule Post</Button>
-                        <Button>Analytics</Button>
-                        <Button>Account Settings</Button>
-                      </div>
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <p className="text-gray-600">Social media management dashboard would be displayed here.</p>
-                      </div>
-                    </div>
-                  )
-                }
-              ]}
-            />
-          </div>
-        </Modal>
       </div>
     </div>
   );
