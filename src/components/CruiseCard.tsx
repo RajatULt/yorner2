@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, IndianRupee, Eye, X, Users, Star, CheckCircle, Heart, Share2, BarChart3 } from 'lucide-react';
 import { Cruise } from '../data/cruises';
 import { wishlistService } from '../services/wishlistService';
@@ -13,15 +13,26 @@ interface CruiseCardProps {
   loading?: boolean;
 }
 
-const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel, onAddToComparison, isBooked = false, loading = false }) => {
+const CruiseCard: React.FC<CruiseCardProps> = ({ 
+  cruise, 
+  onViewDetails, 
+  onCancel, 
+  onAddToComparison, 
+  isBooked = false, 
+  loading = false 
+}) => {
   const { showSuccess, showError } = useToast();
   const [isInWishlist, setIsInWishlist] = useState(false);
 
   // Check wishlist status on mount
   useEffect(() => {
     const checkWishlistStatus = async () => {
-      const status = await wishlistService.isInWishlist(cruise.id);
-      setIsInWishlist(status);
+      try {
+        const status = await wishlistService.isInWishlist(cruise.id);
+        setIsInWishlist(status);
+      } catch (error) {
+        console.error('Error checking wishlist status:', error);
+      }
     };
     checkWishlistStatus();
   }, [cruise.id]);
@@ -230,7 +241,7 @@ const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel
             <button
               onClick={() => onViewDetails(cruise)}
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium"
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Eye size={18} />
               <span>{isBooked ? 'View Booking Details' : 'View Details & Book'}</span>
@@ -317,6 +328,7 @@ const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel
                 </div>
               </div>
             )}
+
             {/* Bottom Gradient Overlay */}
             <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/60 to-transparent"></div>
             
@@ -333,8 +345,5 @@ const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel
     </div>
   );
 };
-
-// Add missing import
-import React, { useState, useEffect } from 'react';
 
 export default CruiseCard;

@@ -102,7 +102,7 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
 
   // Filter data for current admin's region
   const myAgents = allAgents.filter(agent => agent.adminId === "ba1");
-  const myComplaints = complaints.filter(complaint => 
+  const myComplaints = allComplaints.filter(complaint => 
     myAgents.some(agent => agent.id === complaint.agentId)
   );
   const myBookings = allBookings.filter(booking => 
@@ -710,7 +710,7 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
                   </Button>
                   <Button 
                     icon={<Plus />}
-                    onClick={() => showInfo('Quick Add', 'Quick add functionality will be implemented here')}
+                    onClick={() => showWarning('Quick Add', 'Quick add functionality will be implemented here')}
                   >
                     Quick Add
                   </Button>
@@ -765,7 +765,7 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
                 <Button 
                   type="primary" 
                   icon={<Plus />}
-                  onClick={() => showInfo('Create Offer', 'Offer creation functionality will be implemented here')}
+                  onClick={() => showWarning('Create Offer', 'Offer creation functionality will be implemented here')}
                 >
                   Create Offer
                 </Button>

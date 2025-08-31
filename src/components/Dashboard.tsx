@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import React, { useState, useEffect } from 'react';
 import { Button } from 'antd';
 import { BarChart3 } from 'lucide-react';
@@ -121,7 +120,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
     const matchesShipType = searchFilters.shipType === 'All Ship Types' || 
                            cruise.shipType === searchFilters.shipType;
 
-    return matchesSearch && matchesDestination && matchesCruiseLine && matchesShipType;
+    const matchesPrice = cruise.pricePerPerson >= searchFilters.priceRange[0] && 
+                        cruise.pricePerPerson <= searchFilters.priceRange[1];
+
+    return matchesSearch && matchesDestination && matchesCruiseLine && matchesShipType && matchesPrice;
   });
 
   // Handle cruise card actions
@@ -305,6 +307,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50">
       {/* Toast Notifications */}
@@ -440,13 +443,30 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
           </div>
 
           {/* No Results Message */}
-          {filteredCruises.length === 0 && (
+          {filteredCruises.length === 0 && !isLoading && (
             <div className="text-center py-12">
               <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-white/30 p-8 max-w-md mx-auto">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">No cruises found</h3>
                 <p className="text-gray-600">
                   Try adjusting your search filters to find more results.
                 </p>
+                <button
+                  onClick={() => setSearchFilters({
+                    searchText: '',
+                    destination: destinations[0],
+                    cruiseLine: cruiseLines[0],
+                    shipType: shipTypes[0],
+                    month: months[0],
+                    priceRange: [15000, 200000],
+                    minRating: 0,
+                    passengerCount: 2,
+                    departureDate: '',
+                    sortBy: 'price_low'
+                  })}
+                  className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+                >
+                  Reset Filters
+                </button>
               </div>
             </div>
           )}

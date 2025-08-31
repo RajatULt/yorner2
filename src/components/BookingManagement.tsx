@@ -50,7 +50,6 @@ const BookingManagement: React.FC<BookingManagementProps> = ({ booking, onClose,
 
   // Cancellation state
   const [cancellationReason, setCancellationReason] = useState('');
-  const [refundAmount, setRefundAmount] = useState(0);
 
   // Calculate cancellation refund based on days until travel
   const calculateRefund = () => {

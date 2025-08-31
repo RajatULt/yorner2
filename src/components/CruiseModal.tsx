@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, Users, Utensils, Bed, Ship, Star } from 'lucide-react';
+import { X, Calendar, Users, Utensils, Bed, Ship, Star, CheckCircle } from 'lucide-react';
 import PDFExport from './PDFExport';
 import PassengerManagement from './PassengerManagement';
 import { Cruise } from '../data/cruises';
@@ -31,7 +31,7 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
   // Form state
   const [bookingForm, setBookingForm] = useState<BookingForm>({
     departureDate: cruise.departureDates[0],
-    roomType: cruise.roomTypes[0],
+    roomType: cruise.roomTypes[0] + ' Cabin',
     passengerCount: 2,
     name: '',
     email: '',
@@ -71,11 +71,6 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
       ...prev,
       [field]: value
     }));
-  };
-
-  // Handle next step
-  const handleNext = () => {
-    setCurrentStep('details');
   };
 
   // Handle booking submission
@@ -187,44 +182,44 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
             <div>
               {/* Cruise Details Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Left Column - Image and Basic Info */}
-            <div>
-              <img
-                src={cruise.image}
-                alt={cruise.name}
-                className="w-full h-64 object-cover rounded-lg mb-4"
-              />
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-gray-700">
-                  <Ship size={20} />
-                  <span><strong>Route:</strong> {cruise.from} → {cruise.to}</span>
+                {/* Left Column - Image and Basic Info */}
+                <div>
+                  <img
+                    src={cruise.image}
+                    alt={cruise.name}
+                    className="w-full h-64 object-cover rounded-lg mb-4"
+                  />
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Ship size={20} />
+                      <span><strong>Route:</strong> {cruise.from} → {cruise.to}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Calendar size={20} />
+                      <span><strong>Duration:</strong> {cruise.duration} nights</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Star size={20} />
+                      <span><strong>Ship Type:</strong> {cruise.shipType}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-gray-700">
-                  <Calendar size={20} />
-                  <span><strong>Duration:</strong> {cruise.duration} nights</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-700">
-                  <Star size={20} />
-                  <span><strong>Ship Type:</strong> {cruise.shipType}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Right Column - Amenities and Description */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Description</h3>
-              <p className="text-gray-700 mb-4">{cruise.description}</p>
-              
-              <h3 className="text-lg font-semibold mb-3">Ship Amenities</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {cruise.amenities.map((amenity, index) => (
-                  <span key={index} className="text-sm bg-blue-50 text-blue-800 px-2 py-1 rounded">
-                    {amenity}
-                  </span>
-                ))}
+                {/* Right Column - Amenities and Description */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Description</h3>
+                  <p className="text-gray-700 mb-4">{cruise.description}</p>
+                  
+                  <h3 className="text-lg font-semibold mb-3">Ship Amenities</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {cruise.amenities.map((amenity, index) => (
+                      <span key={index} className="text-sm bg-blue-50 text-blue-800 px-2 py-1 rounded">
+                        {amenity}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
               
               {/* Action Button */}
               <div className="text-center">
@@ -243,6 +238,202 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Selection Step */}
+          {(currentStep === 'selection' || currentStep === 'booking-details') && !isBooked && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Selection Options */}
+              <div className="lg:col-span-2 space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800">Customize Your Booking</h3>
+                
+                {/* Departure Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Calendar size={16} />
+                    Departure Date
+                  </label>
+                  <select
+                    value={bookingForm.departureDate}
+                    onChange={(e) => handleFormChange('departureDate', e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {cruise.departureDates.map((date) => (
+                      <option key={date} value={date}>
+                        {new Date(date).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Room Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Bed size={16} />
+                    Cabin Category
+                  </label>
+                  <select
+                    value={bookingForm.roomType}
+                    onChange={(e) => handleFormChange('roomType', e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {cruise.roomTypes.map((type) => {
+                      const cabinType = `${type} Cabin`;
+                      const multiplier = roomPricing[cabinType as keyof typeof roomPricing] || 1.0;
+                      const premium = Math.round((multiplier * 100) - 100);
+                      return (
+                        <option key={type} value={cabinType}>
+                          {cabinType} - {formatPrice(cruise.pricePerPerson * multiplier)} {premium > 0 ? `(+${premium}%)` : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* Passenger Count */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Users size={16} />
+                    Number of Passengers
+                  </label>
+                  <select
+                    value={bookingForm.passengerCount}
+                    onChange={(e) => handleFormChange('passengerCount', Number(e.target.value))}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {[1, 2, 3, 4, 5, 6].map((count) => (
+                      <option key={count} value={count}>
+                        {count} {count === 1 ? 'Passenger' : 'Passengers'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Passenger Details Form - Only show if on booking-details step */}
+                {currentStep === 'booking-details' && (
+                  <div className="space-y-4 border-t pt-6">
+                    <h4 className="text-lg font-semibold text-gray-800">Passenger Details</h4>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                      <input
+                        type="text"
+                        value={bookingForm.name}
+                        onChange={(e) => handleFormChange('name', e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter full name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                      <input
+                        type="email"
+                        value={bookingForm.email}
+                        onChange={(e) => handleFormChange('email', e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter email address"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                      <input
+                        type="tel"
+                        value={bookingForm.phone}
+                        onChange={(e) => handleFormChange('phone', e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter 10-digit phone number"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+                      <textarea
+                        value={bookingForm.address}
+                        onChange={(e) => handleFormChange('address', e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20"
+                        placeholder="Enter complete address"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column - Booking Summary */}
+              <div className="bg-gradient-to-br from-blue-50 to-teal-50 p-6 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  {currentStep === 'booking-details' ? 'Final Summary' : 'Booking Summary'}
+                </h3>
+                
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>Cruise:</span>
+                    <span className="font-medium">{cruise.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Departure:</span>
+                    <span>{new Date(bookingForm.departureDate).toLocaleDateString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Room Type:</span>
+                    <span>{bookingForm.roomType.replace('Cabin', '')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Passengers:</span>
+                    <span>{bookingForm.passengerCount}</span>
+                  </div>
+                  
+                  <hr className="my-3" />
+                  
+                  <div className="flex justify-between text-lg font-bold text-green-600">
+                    <span>Total Price:</span>
+                    <span>{formatPrice(calculateTotalPrice())}</span>
+                  </div>
+                </div>
+
+                {currentStep === 'selection' && (
+                  <button
+                    onClick={() => setCurrentStep('passengers')}
+                    className="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium"
+                  >
+                    Next: Add Passengers
+                  </button>
+                )}
+
+                {currentStep === 'booking-details' && (
+                  <button
+                    onClick={handleBookNow}
+                    disabled={loading}
+                    className="w-full mt-6 bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Processing...' : 'Book Now'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Passengers Step */}
+          {currentStep === 'passengers' && !isBooked && (
+            <div>
+              <PassengerManagement
+                bookingId="temp"
+                onSave={(passengers) => {
+                  console.log('Passengers saved:', passengers);
+                  setCurrentStep('booking-details');
+                }}
+                onClose={() => setCurrentStep('selection')}
+              />
             </div>
           )}
 
@@ -293,240 +484,6 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                   A confirmation email has been sent to {bookingForm.email}
                 </p>
               )}
-            </div>
-          )}
-          {/* Selection Step */}
-          {(currentStep === 'selection' || currentStep === 'booking-details') && !isBooked && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Selection Options */}
-              <div className="lg:col-span-2 space-y-6">
-                <h3 className="text-xl font-semibold text-gray-800">Customize Your Booking</h3>
-                
-                {/* Departure Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Calendar size={16} />
-                    Departure Date
-                  </label>
-                  <select
-                    value={bookingForm.departureDate}
-                    onChange={(e) => handleFormChange('departureDate', e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {cruise.departureDates.map((date) => (
-                      <option key={date} value={date}>
-                        {new Date(date).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Room Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Bed size={16} />
-                    Cabin Category
-                  </label>
-                  <select
-                    value={bookingForm.roomType}
-                    onChange={(e) => handleFormChange('roomType', e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {cruise.roomTypes.map((type) => {
-                      const cabinType = `${type} Cabin`;
-                      const multiplier = roomPricing[cabinType as keyof typeof roomPricing] || 1.0;
-                      const premium = Math.round((multiplier * 100) - 100);
-                      return (
-                      <option key={type} value={cabinType}>
-                        {cabinType} - {formatPrice(cruise.pricePerPerson * multiplier)} {premium > 0 ? `(+${premium}%)` : ''}
-                      </option>
-                      );
-                    })}
-                  </select>
-                </div>
-
-                {/* Passenger Count */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Users size={16} />
-                    Number of Passengers
-                  </label>
-                  <select
-                    value={bookingForm.passengerCount}
-                    onChange={(e) => handleFormChange('passengerCount', Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {[1, 2, 3, 4, 5, 6].map((count) => (
-                      <option key={count} value={count}>
-                        {count} {count === 1 ? 'Passenger' : 'Passengers'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Right Column - Booking Summary */}
-              <div className="bg-gradient-to-br from-blue-50 to-teal-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Booking Summary</h3>
-                
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>Cruise:</span>
-                    <span className="font-medium">{cruise.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Departure:</span>
-                    <span>{new Date(bookingForm.departureDate).toLocaleDateString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Room Type:</span>
-                    <span>{bookingForm.roomType.replace('Cabin', '')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Passengers:</span>
-                    <span>{bookingForm.passengerCount}</span>
-                  </div>
-                  
-                  <hr className="my-3" />
-                  
-                  <div className="flex justify-between text-lg font-bold text-green-600">
-                    <span>Total Price:</span>
-                    <span>{formatPrice(calculateTotalPrice())}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setCurrentStep('passengers')}
-                  className="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium"
-                >
-                  Next: Add Passengers
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Passengers Step */}
-          {currentStep === 'passengers' && !isBooked && (
-            <div>
-              <PassengerManagement
-                bookingId="temp"
-                onSave={(passengers) => {
-                  console.log('Passengers saved:', passengers);
-                  setCurrentStep('booking-details');
-                }}
-                onClose={() => setCurrentStep('selection')}
-              />
-            </div>
-          )}
-
-          {/* Details Step */}
-          {currentStep === 'booking-details' && !isBooked && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Passenger Form */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <button
-                    onClick={() => setCurrentStep('passengers')}
-                    className="text-blue-500 hover:text-blue-600 font-medium"
-                  >
-                    ← Back to Passengers
-                  </button>
-                  <h3 className="text-xl font-semibold text-gray-800">Passenger Details</h3>
-                </div>
-
-                {/* Passenger Information Form */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                    <input
-                      type="text"
-                      value={bookingForm.name}
-                      onChange={(e) => handleFormChange('name', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter full name"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                    <input
-                      type="email"
-                      value={bookingForm.email}
-                      onChange={(e) => handleFormChange('email', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter email address"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
-                    <input
-                      type="tel"
-                      value={bookingForm.phone}
-                      onChange={(e) => handleFormChange('phone', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter 10-digit phone number"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
-                    <textarea
-                      value={bookingForm.address}
-                      onChange={(e) => handleFormChange('address', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20"
-                      placeholder="Enter complete address"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column - Booking Summary (Repeated) */}
-              <div className="bg-gradient-to-br from-blue-50 to-teal-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Final Summary</h3>
-                
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>Cruise:</span>
-                    <span className="font-medium">{cruise.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Departure:</span>
-                    <span>{new Date(bookingForm.departureDate).toLocaleDateString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Room Type:</span>
-                    <span>{bookingForm.roomType.replace('Cabin', '')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Passengers:</span>
-                    <span>{bookingForm.passengerCount}</span>
-                  </div>
-                  
-                  <hr className="my-3" />
-                  
-                  <div className="flex justify-between text-lg font-bold text-green-600">
-                    <span>Total Price:</span>
-                    <span>{formatPrice(calculateTotalPrice())}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleBookNow}
-                  disabled={loading}
-                  className="w-full mt-6 bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Processing...' : 'Book Now'}
-                </button>
-              </div>
             </div>
           )}
         </div>

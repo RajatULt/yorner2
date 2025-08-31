@@ -58,6 +58,7 @@ interface SuperAdminDashboardProps {
   onLogout: () => void;
   onBack: () => void;
 }
+
 const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   userRole,
   onLogout,
@@ -235,6 +236,7 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           ))}
         </nav>
       </aside>
+      
       <div className="ps-64 w-full">
         {/* Header */}
         <header className="flex items-center justify-between px-8 py-5 border-b bg-white shadow-sm w-full">
@@ -454,6 +456,60 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             </div>
           )}
 
+          {/* Permissions Tab */}
+          {activeTab === 'permissions' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Permission Management</h2>
+                <Button type="primary" icon={<Plus />}>
+                  Create Role
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {allAgents.slice(0, 6).map(agent => (
+                  <Card key={agent.id} className="bg-white shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <div className="font-medium">{agent.name}</div>
+                        <div className="text-sm text-gray-600">{agent.region}</div>
+                      </div>
+                      <Tag color={agent.status === 'Active' ? 'green' : 'red'}>
+                        {agent.status}
+                      </Tag>
+                    </div>
+                    <Button 
+                      block 
+                      onClick={() => handleManagePermissions(agent)}
+                    >
+                      Manage Permissions
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Corporate Tab */}
+          {activeTab === 'corporate' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Corporate Management</h2>
+                <Button type="primary" icon={<Plus />}>
+                  Add Corporate Client
+                </Button>
+              </div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <p className="text-gray-600 mb-4">Corporate client management and B2B partnerships:</p>
+                <ul className="text-sm text-gray-700 space-y-2">
+                  <li>• Corporate booking management</li>
+                  <li>• Volume discount configuration</li>
+                  <li>• Contract management</li>
+                  <li>• Dedicated account managers</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
           {/* CMS Tab */}
           {activeTab === 'cms' && (
             <div>
@@ -471,6 +527,68 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 <Card title="Social Media" className="shadow">
                   <p className="text-gray-600 mb-4">Social media integration and content scheduling</p>
                   <Button block>Social Media Dashboard</Button>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Analytics Tab */}
+          {activeTab === 'analytics' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">System Analytics</h2>
+                <Button type="primary" icon={<Download />}>
+                  Export Analytics
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card title="User Analytics" className="shadow">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Total Users:</span>
+                      <span className="font-medium">{systemAnalytics.totalUsers}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Active Users:</span>
+                      <span className="font-medium">{systemAnalytics.activeUsers}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Conversion Rate:</span>
+                      <span className="font-medium">{systemAnalytics.conversionRate}%</span>
+                    </div>
+                  </div>
+                </Card>
+                <Card title="Revenue Analytics" className="shadow">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Total Revenue:</span>
+                      <span className="font-medium">₹{(systemAnalytics.totalRevenue / 1000000).toFixed(1)}Cr</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Avg Booking:</span>
+                      <span className="font-medium">₹{systemAnalytics.averageBookingValue.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Customer Satisfaction:</span>
+                      <span className="font-medium">{systemAnalytics.customerSatisfaction}/5</span>
+                    </div>
+                  </div>
+                </Card>
+                <Card title="Performance Metrics" className="shadow">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Total Bookings:</span>
+                      <span className="font-medium">{systemAnalytics.totalBookings}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Repeat Customers:</span>
+                      <span className="font-medium">{systemAnalytics.repeatCustomerRate}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Conversion Rate:</span>
+                      <span className="font-medium">{systemAnalytics.conversionRate}%</span>
+                    </div>
+                  </div>
                 </Card>
               </div>
             </div>
@@ -528,41 +646,70 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           )}
         </Modal>
 
-        {/* Cruise Management Modal */}
+        {/* Agent Details Modal */}
         <Modal
-          title="Cruise Management"
-          open={showCruiseModal}
-          onCancel={() => setShowCruiseModal(false)}
+          title="Agent Details"
+          open={!!selectedAgent && !showPermissionModal}
+          onCancel={() => setSelectedAgent(null)}
           footer={null}
-          width={800}
+          width={600}
         >
-          <div className="space-y-6">
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h4 className="font-medium text-blue-800 mb-2">Hold Period Configuration</h4>
-              <div className="space-y-2 text-sm text-blue-700">
-                <p>• 7-day cruises: 1 day automatic hold</p>
-                <p>• 15-day cruises: 2 day automatic hold</p>
-                <p>• Custom hold periods can be set per cruise</p>
+          {selectedAgent && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                  {selectedAgent.name.split(' ').map(n => n[0]).join('')}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">{selectedAgent.name}</h3>
+                  <p className="text-gray-600">{selectedAgent.email}</p>
+                  <Tag color={selectedAgent.status === 'Active' ? 'green' : 'red'}>
+                    {selectedAgent.status}
+                  </Tag>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                  <p className="text-gray-900">{selectedAgent.region}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Joined Date</label>
+                  <p className="text-gray-900">{selectedAgent.joinedDate}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <p className="text-gray-900">{selectedAgent.contactInfo.phone}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Performance Grade</label>
+                  <Tag color={selectedAgent.performance.grade === 'A' ? 'green' : 'orange'}>
+                    Grade {selectedAgent.performance.grade}
+                  </Tag>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <p className="text-gray-900">{selectedAgent.contactInfo.address}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <Card size="small">
+                  <Statistic title="Total Bookings" value={selectedAgent.performance.totalBookings} />
+                </Card>
+                <Card size="small">
+                  <Statistic 
+                    title="Commission Earned" 
+                    value={selectedAgent.performance.commissionEarned}
+                    formatter={(value) => `₹${Number(value).toLocaleString('en-IN')}`}
+                  />
+                </Card>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card title="Pricing Management" size="small">
-                <Button block className="mb-2">Update Base Prices</Button>
-                <Button block className="mb-2">Seasonal Adjustments</Button>
-                <Button block>Cabin Category Rates</Button>
-              </Card>
-              
-              <Card title="Itinerary Management" size="small">
-                <Button block className="mb-2">Route Planning</Button>
-                <Button block className="mb-2">Port Schedules</Button>
-                <Button block>Excursion Management</Button>
-              </Card>
-            </div>
-          </div>
+          )}
         </Modal>
-
-        {/* CMS Management Modal */}
       </div>
     </div>
   );
