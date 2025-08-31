@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from 'antd';
+import { BarChart3 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 import SearchSection from './SearchSection';
 import CruiseCard from './CruiseCard';
 import CruiseModal from './CruiseModal';
+import ComparisonModal from './ComparisonModal';
+import FeaturedCarousel from './FeaturedCarousel';
+import SkeletonCard from './SkeletonCard';
 import AgentPortal from './AgentPortal';
 import HotelDashboard from './HotelDashboard';
 import BasicAdminDashboard from './BasicAdminDashboard';
@@ -29,9 +34,23 @@ interface SearchFilters {
   cruiseLine: string;
   shipType: string;
   month: string;
+  priceRange: [number, number];
+  minRating: number;
+  passengerCount: number;
+  departureDate: string;
+  sortBy: string;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
+  // Auto-redirect to appropriate dashboard based on role
+  useEffect(() => {
+    if (userRole === 'Basic Admin') {
+      setShowBasicAdminDashboard(true);
+    } else if (userRole === 'Super Admin') {
+      setShowSuperAdminDashboard(true);
+    }
+  }, [userRole]);
+
   // Toast notifications
   const { showSuccess, showError, showWarning, ToastContainer } = useToast();
   
@@ -56,11 +75,23 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
     destination: destinations[0],
     cruiseLine: cruiseLines[0],
     shipType: shipTypes[0],
-    month: months[0]
+    month: months[0],
+    priceRange: [15000, 200000],
+    minRating: 0,
+    passengerCount: 2,
+    departureDate: '',
+    sortBy: 'price_low'
   });
 
   // Modal state
   const [selectedCruise, setSelectedCruise] = useState<Cruise | null>(null);
+
+  // Comparison state
+  const [comparisonItems, setComparisonItems] = useState<Cruise[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
+
+  // Loading state for better UX
+  const [isLoading, setIsLoading] = useState(false);
 
   // Profile view state
   const [showProfile, setShowProfile] = useState(false);
@@ -96,6 +127,27 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
   // Handle cruise card actions
   const handleViewDetails = (cruise: Cruise) => {
     setSelectedCruise(cruise);
+  };
+
+  // Handle add to comparison
+  const handleAddToComparison = (cruise: Cruise) => {
+    if (comparisonItems.length >= 4) {
+      showWarning('Comparison Limit', 'You can compare up to 4 cruises at a time');
+      return;
+    }
+    
+    if (comparisonItems.some(item => item.id === cruise.id)) {
+      showWarning('Already Added', 'This cruise is already in your comparison list');
+      return;
+    }
+    
+    setComparisonItems(prev => [...prev, cruise]);
+    showSuccess('Added to Comparison', `${cruise.name} added to comparison list`);
+  };
+
+  // Handle remove from comparison
+  const handleRemoveFromComparison = (cruiseId: string) => {
+    setComparisonItems(prev => prev.filter(item => item.id !== cruiseId));
   };
 
   const handleCancelBooking = async (cruiseId: string) => {
@@ -241,6 +293,18 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
     );
   }
 
+  // For Travel Agents, show the regular dashboard
+  if (userRole !== 'Travel Agent') {
+    // This shouldn't happen due to the useEffect above, but just in case
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shadow-lg p-8 text-center">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Loading Dashboard...</h2>
+          <p className="text-gray-600">Redirecting to your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50">
       {/* Toast Notifications */}
@@ -278,6 +342,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
         <main className="p-6">
           {/* Welcome Header */}
           <div className="mb-8">
+            {/* Featured Carousel for Travel Agents */}
+            <FeaturedCarousel 
+              items={allCruises.slice(0, 6)}
+              onViewDetails={handleViewDetails}
+            />
+            
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
               Welcome back, {userRole === 'Travel Agent' ? 'Agent' : userRole}!
             </h1>
@@ -324,28 +394,49 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
 
           {/* Results Summary */}
           <div className="mb-6">
-            <p className="text-gray-600">
-              Showing {filteredCruises.length} of {allCruises.length} cruises
-              {userBookings.length > 0 && (
-                <span className="ml-4 text-blue-600">
-                  • {userBookings.length} active booking{userBookings.length !== 1 ? 's' : ''}
-                </span>
+            <div className="flex items-center justify-between">
+              <p className="text-gray-600">
+                Showing {filteredCruises.length} of {allCruises.length} cruises
+                {userBookings.length > 0 && (
+                  <span className="ml-4 text-blue-600">
+                    • {userBookings.length} active booking{userBookings.length !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </p>
+              
+              {/* Comparison Button */}
+              {comparisonItems.length > 0 && (
+                <button
+                  onClick={() => setShowComparison(true)}
+                  className="flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  <BarChart3 size={18} />
+                  Compare ({comparisonItems.length})
+                </button>
               )}
-            </p>
+            </div>
           </div>
 
           {/* Cruise Cards Grid */}
           <div className="space-y-6">
-            {filteredCruises.map((cruise) => (
-              <CruiseCard
-                key={cruise.id}
-                cruise={cruise}
-                onViewDetails={handleViewDetails}
-                onCancel={handleCancelBooking}
-                isBooked={userBookings.includes(cruise.id)}
-                loading={loading}
-              />
-            ))}
+            {isLoading ? (
+              // Show skeleton cards while loading
+              [...Array(3)].map((_, index) => (
+                <SkeletonCard key={index} type="cruise" />
+              ))
+            ) : (
+              filteredCruises.map((cruise) => (
+                <CruiseCard
+                  key={cruise.id}
+                  cruise={cruise}
+                  onViewDetails={handleViewDetails}
+                  onCancel={handleCancelBooking}
+                  onAddToComparison={handleAddToComparison}
+                  isBooked={userBookings.includes(cruise.id)}
+                  loading={loading}
+                />
+              ))
+            )}
           </div>
 
           {/* No Results Message */}
@@ -364,6 +455,16 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
 
       {/* Chatbot Widget */}
       <ChatbotWidget />
+      
+      {/* Comparison Modal */}
+      {showComparison && (
+        <ComparisonModal
+          items={comparisonItems}
+          type="cruise"
+          onClose={() => setShowComparison(false)}
+          onRemoveItem={handleRemoveFromComparison}
+        />
+      )}
       
       {/* Cruise Details Modal */}
       {selectedCruise && (

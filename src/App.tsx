@@ -24,7 +24,14 @@ function App() {
 
   // Handle successful login
   const handleLoginSuccess = (userData: any) => {
-    setCurrentPage('dashboard');
+    // Navigate based on user role
+    if (userData.role === 'Basic Admin') {
+      setCurrentPage('dashboard'); // Will show BasicAdminDashboard directly
+    } else if (userData.role === 'Super Admin') {
+      setCurrentPage('dashboard'); // Will show SuperAdminDashboard directly
+    } else {
+      setCurrentPage('dashboard'); // Regular dashboard for Travel Agents
+    }
   };
 
   // Handle logout

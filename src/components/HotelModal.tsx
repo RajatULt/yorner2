@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Calendar, Users, Utensils, Bed, MapPin, Star, CheckCircle } from 'lucide-react';
 import { DatePicker } from 'antd';
 import ReviewSystem from './ReviewSystem';
+import PDFExport from './PDFExport';
 import { Hotel } from '../data/hotels';
 import dayjs, { Dayjs } from 'dayjs';
 

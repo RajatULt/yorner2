@@ -1,20 +1,80 @@
 import React from 'react';
-import { Calendar, Clock, MapPin, IndianRupee, Eye, X, Users, Star, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, IndianRupee, Eye, X, Users, Star, CheckCircle, Heart, Share2, BarChart3 } from 'lucide-react';
 import { Cruise } from '../data/cruises';
+import { wishlistService } from '../services/wishlistService';
+import { useToast } from './ToastNotification';
 
 interface CruiseCardProps {
   cruise: Cruise;
   onViewDetails: (cruise: Cruise) => void;
   onCancel: (cruiseId: string) => void;
+  onAddToComparison?: (cruise: Cruise) => void;
   isBooked?: boolean;
   loading?: boolean;
 }
 
-const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel, isBooked = false, loading = false }) => {
+const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel, onAddToComparison, isBooked = false, loading = false }) => {
+  const { showSuccess, showError } = useToast();
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
+  // Check wishlist status on mount
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      const status = await wishlistService.isInWishlist(cruise.id);
+      setIsInWishlist(status);
+    };
+    checkWishlistStatus();
+  }, [cruise.id]);
+
   // Handle cancel with confirmation
   const handleCancel = () => {
     if (isBooked && window.confirm(`Are you sure you want to cancel booking for ${cruise.name}?`)) {
       onCancel(cruise.id);
+    }
+  };
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = async () => {
+    try {
+      if (isInWishlist) {
+        await wishlistService.removeFromWishlist(cruise.id);
+        setIsInWishlist(false);
+        showSuccess('Removed from Wishlist', `${cruise.name} removed from your wishlist`);
+      } else {
+        await wishlistService.addToWishlist({
+          id: cruise.id,
+          name: cruise.name,
+          type: 'cruise',
+          price: cruise.pricePerPerson,
+          image: cruise.image,
+          priority: 'Medium',
+          notes: ''
+        });
+        setIsInWishlist(true);
+        showSuccess('Added to Wishlist', `${cruise.name} added to your wishlist`);
+      }
+    } catch (error) {
+      showError('Wishlist Error', 'Failed to update wishlist');
+    }
+  };
+
+  // Handle share
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: cruise.name,
+          text: cruise.description,
+          url: window.location.href
+        });
+      } catch (error) {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(`Check out ${cruise.name}: ${cruise.description}`);
+        showSuccess('Link Copied', 'Cruise details copied to clipboard');
+      }
+    } else {
+      navigator.clipboard.writeText(`Check out ${cruise.name}: ${cruise.description}`);
+      showSuccess('Link Copied', 'Cruise details copied to clipboard');
     }
   };
 
@@ -166,6 +226,7 @@ const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
+            {/* Primary Action Button */}
             <button
               onClick={() => onViewDetails(cruise)}
               disabled={loading}
@@ -174,6 +235,41 @@ const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel
               <Eye size={18} />
               <span>{isBooked ? 'View Booking Details' : 'View Details & Book'}</span>
             </button>
+            
+            {/* Secondary Actions */}
+            <div className="flex gap-2">
+              {/* Wishlist Button */}
+              <button
+                onClick={handleWishlistToggle}
+                className={`flex items-center justify-center gap-2 py-3 px-4 rounded-lg transition-colors duration-200 font-medium ${
+                  isInWishlist
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-white/20 hover:bg-white/30 text-gray-700 border border-white/40'
+                }`}
+              >
+                <Heart size={18} className={isInWishlist ? 'fill-current' : ''} />
+              </button>
+              
+              {/* Share Button */}
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-gray-700 py-3 px-4 rounded-lg transition-colors duration-200 font-medium border border-white/40"
+              >
+                <Share2 size={18} />
+              </button>
+              
+              {/* Compare Button */}
+              {onAddToComparison && (
+                <button
+                  onClick={() => onAddToComparison(cruise)}
+                  className="flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-600 text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium"
+                >
+                  <BarChart3 size={18} />
+                </button>
+              )}
+            </div>
+            
+            {/* Cancel Button for Booked Cruises */}
             {isBooked && (
               <button
                 onClick={handleCancel}
@@ -237,5 +333,8 @@ const CruiseCard: React.FC<CruiseCardProps> = ({ cruise, onViewDetails, onCancel
     </div>
   );
 };
+
+// Add missing import
+import React, { useState, useEffect } from 'react';
 
 export default CruiseCard;
