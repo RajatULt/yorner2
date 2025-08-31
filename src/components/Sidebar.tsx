@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, User, History, MessageCircle, LogOut, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, History, MessageCircle, LogOut, Settings, Shield, Users as UsersIcon } from 'lucide-react';
 import { Slider, Checkbox } from 'antd';
 import type { CheckboxProps } from 'antd';
 import { outdoorAmenities, indoorAmenities } from '../data/cruises';
@@ -10,6 +10,8 @@ interface SidebarProps {
   userRole: string;
   onLogout: () => void;
   onViewProfile: () => void;
+  onShowBasicAdmin?: () => void;
+  onShowSuperAdmin?: () => void;
 }
 
 interface FilterState {
@@ -20,7 +22,15 @@ interface FilterState {
   selectedIndoorAmenities: string[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle, userRole, onLogout, onViewProfile }) => {
+const Sidebar: React.FC<SidebarProps> = ({ 
+  isCollapsed, 
+  onToggle, 
+  userRole, 
+  onLogout, 
+  onViewProfile,
+  onShowBasicAdmin,
+  onShowSuperAdmin 
+}) => {
   // State for expandable filters section
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   
@@ -182,6 +192,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle, userRole, onLo
 
         {/* Bottom Section - Actions */}
         <div className="mt-auto space-y-2">
+          {/* Role-specific admin access */}
+          {userRole === 'Basic Admin' && onShowBasicAdmin && (
+            <button 
+              onClick={onShowBasicAdmin}
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors`}
+            >
+              <UsersIcon size={18} />
+              {!isCollapsed && <span>Admin Dashboard</span>}
+            </button>
+          )}
+          
+          {userRole === 'Super Admin' && onShowSuperAdmin && (
+            <button 
+              onClick={onShowSuperAdmin}
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors`}
+            >
+              <Shield size={18} />
+              {!isCollapsed && <span>Super Admin</span>}
+            </button>
+          )}
+          
           <button 
             onClick={onViewProfile}
             className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors`}

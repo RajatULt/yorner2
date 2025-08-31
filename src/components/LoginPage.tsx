@@ -78,7 +78,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         // Login successful
         const matchedCredential = demoCredentials.find(cred => cred.email === formData.email);
         if (matchedCredential) {
-          onLoginSuccess(matchedCredential.role);
+          onLoginSuccess(matchedCredential);
         }
       } else if (result.requiresOTP) {
         // Show OTP modal for agents
@@ -103,7 +103,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         setShowOTPModal(false);
         const matchedCredential = demoCredentials.find(cred => cred.email === formData.email);
         if (matchedCredential) {
-          onLoginSuccess(matchedCredential.role);
+          onLoginSuccess(matchedCredential);
         }
       } else {
         alert(result.error || "OTP verification failed");

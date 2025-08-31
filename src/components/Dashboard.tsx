@@ -13,6 +13,7 @@ import RoleBasedRoute from './RoleBasedRoute';
 import NotificationSystem from './NotificationSystem';
 import ChatbotWidget from './ChatbotWidget';
 import { useToast } from './ToastNotification';
+import { useAuth } from '../hooks/useAuth';
 import { cruises, destinations, cruiseLines, shipTypes, months } from '../data/cruises';
 import { additionalCruises } from '../data/extendedMockData';
 import type { Cruise } from '../data/cruises';
@@ -33,6 +34,9 @@ interface SearchFilters {
 const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
   // Toast notifications
   const { showSuccess, showError, showWarning, ToastContainer } = useToast();
+  
+  // Auth hook for role verification
+  const { user, hasPermission } = useAuth();
   
   // Sidebar state
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -154,10 +158,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
 
   // Handle admin dashboard navigation
   const handleShowBasicAdminDashboard = () => {
-    if (userRole === 'Basic Admin') {
+    if (userRole === 'Basic Admin' || (user && user.role === 'Basic Admin')) {
       setShowBasicAdminDashboard(true);
     } else {
-      alert('Access denied: Basic Admin role required');
+      showError(
+        'Access Denied',
+        'Basic Admin role required to access this dashboard.'
+      );
     }
   };
 
@@ -166,10 +173,13 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
   };
 
   const handleShowSuperAdminDashboard = () => {
-    if (userRole === 'Super Admin') {
+    if (userRole === 'Super Admin' || (user && user.role === 'Super Admin')) {
       setShowSuperAdminDashboard(true);
     } else {
-      alert('Access denied: Super Admin role required');
+      showError(
+        'Access Denied', 
+        'Super Admin role required to access this dashboard.'
+      );
     }
   };
 
@@ -212,26 +222,22 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
   // If showing basic admin dashboard, render BasicAdminDashboard
   if (showBasicAdminDashboard) {
     return (
-      <RoleBasedRoute requiredRole="Basic Admin">
-        <BasicAdminDashboard 
-          userRole={userRole}
-          onLogout={onLogout}
-          onBack={handleBackFromBasicAdminDashboard}
-        />
-      </RoleBasedRoute>
+      <BasicAdminDashboard 
+        userRole={userRole}
+        onLogout={onLogout}
+        onBack={handleBackFromBasicAdminDashboard}
+      />
     );
   }
 
   // If showing super admin dashboard, render SuperAdminDashboard
   if (showSuperAdminDashboard) {
     return (
-      <RoleBasedRoute requiredRole="Super Admin">
-        <SuperAdminDashboard 
-          userRole={userRole}
-          onLogout={onLogout}
-          onBack={handleBackFromSuperAdminDashboard}
-        />
-      </RoleBasedRoute>
+      <SuperAdminDashboard 
+        userRole={userRole}
+        onLogout={onLogout}
+        onBack={handleBackFromSuperAdminDashboard}
+      />
     );
   }
 
@@ -247,6 +253,8 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
         userRole={userRole}
         onLogout={onLogout}
         onViewProfile={handleViewProfile}
+        onShowBasicAdmin={userRole === 'Basic Admin' ? handleShowBasicAdminDashboard : undefined}
+        onShowSuperAdmin={userRole === 'Super Admin' ? handleShowSuperAdminDashboard : undefined}
       />
 
       {/* Main Content */}
@@ -285,29 +293,25 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
             {/* Role-specific quick actions */}
             {userRole === 'Basic Admin' && (
               <div className="mt-4">
-                <RoleBasedRoute requiredRole="Basic Admin">
-                  <Button 
-                    type="primary" 
-                    onClick={handleShowBasicAdminDashboard}
-                    className="mr-4"
-                  >
-                    Open Admin Dashboard
-                  </Button>
-                </RoleBasedRoute>
+                <Button 
+                  type="primary" 
+                  onClick={handleShowBasicAdminDashboard}
+                  className="mr-4"
+                >
+                  Open Admin Dashboard
+                </Button>
               </div>
             )}
             
             {userRole === 'Super Admin' && (
               <div className="mt-4">
-                <RoleBasedRoute requiredRole="Super Admin">
-                  <Button 
-                    type="primary" 
-                    onClick={handleShowSuperAdminDashboard}
-                    className="mr-4"
-                  >
-                    Open Super Admin Dashboard
-                  </Button>
-                </RoleBasedRoute>
+                <Button 
+                  type="primary" 
+                  onClick={handleShowSuperAdminDashboard}
+                  className="mr-4"
+                >
+                  Open Super Admin Dashboard
+                </Button>
               </div>
             )}
           </div>

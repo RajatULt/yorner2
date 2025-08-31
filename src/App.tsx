@@ -23,7 +23,7 @@ function App() {
   };
 
   // Handle successful login
-  const handleLoginSuccess = (role: string) => {
+  const handleLoginSuccess = (userData: any) => {
     setCurrentPage('dashboard');
   };
 

@@ -65,6 +65,24 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 }) => {
   // Toast notifications
   const { showSuccess, showError, showInfo, ToastContainer } = useToast();
+
+  // Role verification
+  if (userRole !== 'Super Admin') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shadow-lg p-8 text-center">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">Super Admin role required to access this dashboard.</p>
+          <button
+            onClick={onBack}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
@@ -86,12 +104,18 @@ const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   // Handle cruise management
   const handleManageCruise = () => {
-    setShowCruiseModal(true);
+    showInfo(
+      'Cruise Management',
+      'Advanced cruise management with hold periods: 7-day cruises (1 day hold), 15-day cruises (2 day hold)'
+    );
   };
 
   // Handle CMS management
   const handleCMSManagement = () => {
-    setShowCMSModal(true);
+    showInfo(
+      'CMS Management',
+      'Content Management System for blog posts, social media integration, and website content'
+    );
   };
 
   // Agent columns with actions

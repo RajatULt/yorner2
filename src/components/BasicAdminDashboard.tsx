@@ -47,6 +47,24 @@ interface BasicAdminDashboardProps {
 const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onLogout, onBack }) => {
   // Toast notifications
   const { showSuccess, showError, showWarning, ToastContainer } = useToast();
+
+  // Role verification
+  if (userRole !== 'Basic Admin') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shadow-lg p-8 text-center">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Access Denied</h2>
+          <p className="text-gray-600 mb-4">Basic Admin role required to access this dashboard.</p>
+          <button
+            onClick={onBack}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   // State management
   const [activeTab, setActiveTab] = useState('overview');
@@ -692,7 +710,7 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
                   </Button>
                   <Button 
                     icon={<Plus />}
-                    onClick={() => setShowInventoryModal(true)}
+                    onClick={() => showInfo('Quick Add', 'Quick add functionality will be implemented here')}
                   >
                     Quick Add
                   </Button>
@@ -747,7 +765,7 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
                 <Button 
                   type="primary" 
                   icon={<Plus />}
-                  onClick={() => setShowOfferModal(true)}
+                  onClick={() => showInfo('Create Offer', 'Offer creation functionality will be implemented here')}
                 >
                   Create Offer
                 </Button>
