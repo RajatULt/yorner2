@@ -10,7 +10,6 @@ export interface Cruise {
   amenities: string[];
   pricePerPerson: number;
   roomTypes: string[];
-  mealPlans: string[];
   description: string;
   shipType: string;
   cruiseLine: string;
@@ -28,7 +27,6 @@ export const cruises: Cruise[] = [
     amenities: ["Swimming Pool", "Spa", "Casino", "Theater", "Rock Climbing", "Mini Golf"],
     pricePerPerson: 45000,
     roomTypes: ["Interior", "Ocean View", "Balcony", "Suite"],
-    mealPlans: ["All Inclusive", "Premium Plus", "Basic Plus"],
     description: "Experience luxury on the Arabian Sea with world-class amenities and entertainment.",
     shipType: "Mega Ship",
     cruiseLine: "Royal Caribbean"
@@ -44,7 +42,6 @@ export const cruises: Cruise[] = [
     amenities: ["Fine Dining", "Spa", "Library", "Art Gallery", "Fitness Center"],
     pricePerPerson: 38000,
     roomTypes: ["Interior", "Ocean View", "Balcony", "Suite"],
-    mealPlans: ["All Inclusive", "Premium Plus", "Basic Plus"],
     description: "Elegant cruising along India's western coast with premium dining and cultural experiences.",
     shipType: "Premium Ship",
     cruiseLine: "Celebrity Cruises"
@@ -60,7 +57,6 @@ export const cruises: Cruise[] = [
     amenities: ["Water Slides", "Kids Club", "Shows", "Casino", "Multiple Restaurants"],
     pricePerPerson: 32000,
     roomTypes: ["Interior", "Ocean View", "Balcony"],
-    mealPlans: ["All Inclusive", "Basic Plus"],
     description: "Family-friendly adventure with exciting activities and entertainment for all ages.",
     shipType: "Family Ship",
     cruiseLine: "Norwegian Cruise Line"
@@ -76,7 +72,6 @@ export const cruises: Cruise[] = [
     amenities: ["Spa", "Fine Dining", "Cultural Shows", "Yoga Classes", "Photography Classes"],
     pricePerPerson: 52000,
     roomTypes: ["Ocean View", "Balcony", "Suite", "Penthouse"],
-    mealPlans: ["All Inclusive", "Premium Plus"],
     description: "Discover pristine coral islands with luxury accommodations and cultural immersion.",
     shipType: "Luxury Ship",
     cruiseLine: "Princess Cruises"
@@ -92,7 +87,6 @@ export const cruises: Cruise[] = [
     amenities: ["Promenade", "Shopping", "Multiple Pools", "Sports Bar", "Live Music"],
     pricePerPerson: 28000,
     roomTypes: ["Interior", "Ocean View", "Balcony"],
-    mealPlans: ["All Inclusive", "Basic Plus"],
     description: "Short getaway with modern amenities and Mediterranean-style elegance.",
     shipType: "Modern Ship",
     cruiseLine: "MSC Cruises"
@@ -108,7 +102,6 @@ export const cruises: Cruise[] = [
     amenities: ["Italian Cuisine", "Pool Deck", "Entertainment", "Wellness Center"],
     pricePerPerson: 22000,
     roomTypes: ["Interior", "Ocean View"],
-    mealPlans: ["All Inclusive"],
     description: "Quick coastal escape with authentic Italian hospitality and cuisine.",
     shipType: "Classic Ship",
     cruiseLine: "Costa Cruises"
@@ -124,7 +117,6 @@ export const cruises: Cruise[] = [
     amenities: ["Character Meet & Greet", "Kids Activities", "Family Shows", "Pool Complex"],
     pricePerPerson: 48000,
     roomTypes: ["Interior", "Ocean View", "Balcony", "Suite"],
-    mealPlans: ["All Inclusive", "Premium Plus"],
     description: "Magical family cruise with Disney characters and world-class entertainment.",
     shipType: "Family Ship",
     cruiseLine: "Disney Cruise Line"
@@ -140,7 +132,6 @@ export const cruises: Cruise[] = [
     amenities: ["Culinary Arts Center", "Observatory", "Library", "Spa", "Classical Music"],
     pricePerPerson: 42000,
     roomTypes: ["Interior", "Ocean View", "Balcony", "Suite"],
-    mealPlans: ["All Inclusive", "Premium Plus"],
     description: "Sophisticated cruising with enrichment programs and culinary excellence.",
     shipType: "Premium Ship",
     cruiseLine: "Holland America Line"
@@ -156,7 +147,6 @@ export const cruises: Cruise[] = [
     amenities: ["Sky Diving Simulator", "Robot Bartenders", "Bumper Cars", "Surf Simulator", "Rock Climbing"],
     pricePerPerson: 65000,
     roomTypes: ["Interior", "Ocean View", "Balcony", "Suite", "Penthouse"],
-    mealPlans: ["All Inclusive", "Premium Plus", "Basic Plus"],
     description: "Revolutionary cruise ship with cutting-edge technology and thrilling activities.",
     shipType: "Quantum Class",
     cruiseLine: "Royal Caribbean"
@@ -172,7 +162,6 @@ export const cruises: Cruise[] = [
     amenities: ["Ultra-Luxury Suites", "Personal Butler", "Michelin-Star Dining", "Marina Platform", "Spa Terrace"],
     pricePerPerson: 95000,
     roomTypes: ["Ocean View", "Balcony", "Suite", "Penthouse"],
-    mealPlans: ["All Inclusive", "Premium Plus"],
     description: "Ultra-luxury small ship cruising with personalized service and exclusive experiences.",
     shipType: "Ultra-Luxury",
     cruiseLine: "Seabourn"

@@ -24,11 +24,26 @@ const SearchSection: React.FC<SearchSectionProps> = ({ filters, onFiltersChange 
     });
   };
 
+  // Handle search submit
+  const handleSearchSubmit = () => {
+    // Trigger search - in real app this would call API
+    console.log('Searching with filters:', filters);
+  };
+
   return (
     <div className="bg-white/20 backdrop-blur-md rounded-lg border border-white/30 shadow-lg p-6 mb-6">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Search & Filter Cruises</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">Search & Filter Cruises</h2>
+        <button
+          onClick={handleSearchSubmit}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+        >
+          <Search size={18} />
+          Search
+        </button>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Text Search */}
         <div className="lg:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">Search Cruises</label>

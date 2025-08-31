@@ -19,7 +19,9 @@ import {
   PieChart,
   User,
   LogOut,
-  Home
+  Home,
+  MessageSquare as MessageIcon,
+  Filter
 } from 'lucide-react';
 import { Table, Modal, Form, Input, Select, Button, Card, Statistic, Progress, Tag, Rate } from 'antd';
 import NotificationSystem from './NotificationSystem';
@@ -32,6 +34,7 @@ import { cruises } from '../data/cruises';
 import { additionalCruises } from '../data/extendedMockData';
 import { hotels } from '../data/hotels';
 import { additionalHotels } from '../data/extendedMockData';
+import InventoryManagement from './InventoryManagement';
 import type { Agent, Complaint, Offer } from '../data/admins';
 import type { Booking } from '../data/bookings';
 
@@ -49,9 +52,18 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showInventoryManagement, setShowInventoryManagement] = useState(false);
   const [inventoryType, setInventoryType] = useState<'cruise' | 'hotel'>('cruise');
+  const [bookingFilters, setBookingFilters] = useState({
+    dateRange: '',
+    agentName: '',
+    companyName: '',
+    paymentStatus: 'All'
+  });
 
   // Mock current admin data
   const currentAdmin = {
@@ -104,6 +116,23 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
       'Offer Assigned',
       `Offer has been assigned to ${agentIds.length} agent(s) successfully.`
     );
+  };
+
+  // Handle booking message
+  const handleBookingMessage = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setShowMessageModal(true);
+  };
+
+  // Handle send message
+  const handleSendMessage = (message: string) => {
+    console.log('Sending message for booking:', selectedBooking?.id, message);
+    showSuccess(
+      'Message Sent',
+      'Your message has been sent to the customer successfully.'
+    );
+    setShowMessageModal(false);
+    setSelectedBooking(null);
   };
 
   // Table columns for agents
@@ -178,19 +207,70 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
       render: (text: string) => <span className="font-mono text-sm">{text}</span>
     },
     {
-      title: 'Date',
+      title: 'Booking Date',
       dataIndex: 'bookingDate',
-      key: 'bookingDate'
+      key: 'bookingDate',
+      sorter: (a: Booking, b: Booking) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime()
     },
     {
       title: 'Agent',
       dataIndex: 'agentName',
-      key: 'agentName'
+      key: 'agentName',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="p-4">
+          <Input
+            placeholder="Search agent name"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ marginBottom: 8, display: 'block' }}
+          />
+          <div className="flex gap-2">
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+            >
+              Search
+            </Button>
+            <Button onClick={() => clearFilters?.()} size="small">
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      onFilter: (value: any, record: Booking) =>
+        record.agentName.toLowerCase().includes(value.toLowerCase())
     },
     {
       title: 'Customer',
       dataIndex: 'customerName',
-      key: 'customerName'
+      key: 'customerName',
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div className="p-4">
+          <Input
+            placeholder="Search customer name"
+            value={selectedKeys[0]}
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => confirm()}
+            style={{ marginBottom: 8, display: 'block' }}
+          />
+          <div className="flex gap-2">
+            <Button
+              type="primary"
+              onClick={() => confirm()}
+              size="small"
+            >
+              Search
+            </Button>
+            <Button onClick={() => clearFilters?.()} size="small">
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      onFilter: (value: any, record: Booking) =>
+        record.customerName.toLowerCase().includes(value.toLowerCase())
     },
     {
       title: 'Service',
@@ -206,7 +286,29 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
       title: 'Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
-      render: (amount: number) => `₹${amount.toLocaleString('en-IN')}`
+      render: (amount: number) => `₹${amount.toLocaleString('en-IN')}`,
+      sorter: (a: Booking, b: Booking) => a.totalAmount - b.totalAmount
+    },
+    {
+      title: 'Payment Status',
+      dataIndex: 'paymentStatus',
+      key: 'paymentStatus',
+      render: (status: string) => (
+        <Tag color={
+          status === 'Paid' ? 'green' : 
+          status === 'Pending' ? 'orange' : 
+          status === 'Failed' ? 'red' : 'blue'
+        }>
+          {status}
+        </Tag>
+      ),
+      filters: [
+        { text: 'Paid', value: 'Paid' },
+        { text: 'Pending', value: 'Pending' },
+        { text: 'Failed', value: 'Failed' },
+        { text: 'Refunded', value: 'Refunded' }
+      ],
+      onFilter: (value: any, record: Booking) => record.paymentStatus === value
     },
     {
       title: 'Status',
@@ -220,6 +322,23 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
         }>
           {status}
         </Tag>
+      )
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (record: Booking) => (
+        <div className="flex gap-2">
+          <Button 
+            size="small" 
+            icon={<MessageIcon />}
+            onClick={() => handleBookingMessage(record)}
+            title="Send message to customer"
+          />
+          <Button size="small" onClick={() => console.log('View booking details:', record.id)}>
+            View
+          </Button>
+        </div>
       )
     }
   ];
@@ -513,16 +632,26 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Booking Logs</h2>
-                <Button type="primary" icon={<Download />}>
-                  Export Data
-                </Button>
+                <div className="flex gap-2">
+                  <Button icon={<Filter />} onClick={() => console.log('Advanced filters')}>
+                    Advanced Filters
+                  </Button>
+                  <Button type="primary" icon={<Download />}>
+                    Export Data
+                  </Button>
+                </div>
               </div>
               <Table
                 columns={bookingColumns}
                 dataSource={myBookings}
                 rowKey="id"
                 className="bg-white/50 rounded-lg"
-                pagination={{ pageSize: 10 }}
+                pagination={{ 
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} bookings`
+                }}
               />
             </div>
           )}
@@ -553,13 +682,21 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Inventory Management</h2>
-                <Button 
-                  type="primary" 
-                  icon={<Plus />}
-                  onClick={() => setShowInventoryModal(true)}
-                >
-                  Add New Item
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    type="primary" 
+                    icon={<Settings />}
+                    onClick={() => setShowInventoryManagement(true)}
+                  >
+                    Manage Inventory
+                  </Button>
+                  <Button 
+                    icon={<Plus />}
+                    onClick={() => setShowInventoryModal(true)}
+                  >
+                    Quick Add
+                  </Button>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -761,6 +898,75 @@ const BasicAdminDashboard: React.FC<BasicAdminDashboardProps> = ({ userRole, onL
           </div>
         )}
       </Modal>
+
+      {/* Booking Message Modal */}
+      <Modal
+        title="Send Message to Customer"
+        open={showMessageModal}
+        onCancel={() => {
+          setShowMessageModal(false);
+          setSelectedBooking(null);
+        }}
+        footer={null}
+        width={500}
+      >
+        {selectedBooking && (
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium text-gray-800 mb-2">Booking Details</h4>
+              <p><strong>ID:</strong> {selectedBooking.id}</p>
+              <p><strong>Customer:</strong> {selectedBooking.customerName}</p>
+              <p><strong>Service:</strong> {selectedBooking.itemName}</p>
+              <p><strong>Amount:</strong> ₹{selectedBooking.totalAmount.toLocaleString('en-IN')}</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Message to Customer
+              </label>
+              <textarea
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Type your message here..."
+                id="customer-message"
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <Button
+                type="primary"
+                onClick={() => {
+                  const textarea = document.getElementById('customer-message') as HTMLTextAreaElement;
+                  if (textarea?.value.trim()) {
+                    handleSendMessage(textarea.value);
+                  } else {
+                    alert('Please enter a message');
+                  }
+                }}
+                className="flex-1"
+              >
+                Send Message
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowMessageModal(false);
+                  setSelectedBooking(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Inventory Management Modal */}
+      {showInventoryManagement && (
+        <InventoryManagement
+          userRole={userRole}
+          onClose={() => setShowInventoryManagement(false)}
+        />
+      )}
     </div>
   );
 };

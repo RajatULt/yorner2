@@ -9,6 +9,7 @@ import AgentPortal from './AgentPortal';
 import HotelDashboard from './HotelDashboard';
 import BasicAdminDashboard from './BasicAdminDashboard';
 import SuperAdminDashboard from './SuperAdminDashboard';
+import RoleBasedRoute from './RoleBasedRoute';
 import NotificationSystem from './NotificationSystem';
 import ChatbotWidget from './ChatbotWidget';
 import { useToast } from './ToastNotification';
@@ -153,7 +154,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
 
   // Handle admin dashboard navigation
   const handleShowBasicAdminDashboard = () => {
-    setShowBasicAdminDashboard(true);
+    if (userRole === 'Basic Admin') {
+      setShowBasicAdminDashboard(true);
+    } else {
+      alert('Access denied: Basic Admin role required');
+    }
   };
 
   const handleBackFromBasicAdminDashboard = () => {
@@ -161,7 +166,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
   };
 
   const handleShowSuperAdminDashboard = () => {
-    setShowSuperAdminDashboard(true);
+    if (userRole === 'Super Admin') {
+      setShowSuperAdminDashboard(true);
+    } else {
+      alert('Access denied: Super Admin role required');
+    }
   };
 
   const handleBackFromSuperAdminDashboard = () => {
@@ -203,22 +212,26 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
   // If showing basic admin dashboard, render BasicAdminDashboard
   if (showBasicAdminDashboard) {
     return (
-      <BasicAdminDashboard 
-        userRole={userRole}
-        onLogout={onLogout}
-        onBack={handleBackFromBasicAdminDashboard}
-      />
+      <RoleBasedRoute requiredRole="Basic Admin">
+        <BasicAdminDashboard 
+          userRole={userRole}
+          onLogout={onLogout}
+          onBack={handleBackFromBasicAdminDashboard}
+        />
+      </RoleBasedRoute>
     );
   }
 
   // If showing super admin dashboard, render SuperAdminDashboard
   if (showSuperAdminDashboard) {
     return (
-      <SuperAdminDashboard 
-        userRole={userRole}
-        onLogout={onLogout}
-        onBack={handleBackFromSuperAdminDashboard}
-      />
+      <RoleBasedRoute requiredRole="Super Admin">
+        <SuperAdminDashboard 
+          userRole={userRole}
+          onLogout={onLogout}
+          onBack={handleBackFromSuperAdminDashboard}
+        />
+      </RoleBasedRoute>
     );
   }
 
@@ -272,25 +285,29 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, onLogout }) => {
             {/* Role-specific quick actions */}
             {userRole === 'Basic Admin' && (
               <div className="mt-4">
-                <Button 
-                  type="primary" 
-                  onClick={handleShowBasicAdminDashboard}
-                  className="mr-4"
-                >
-                  Open Admin Dashboard
-                </Button>
+                <RoleBasedRoute requiredRole="Basic Admin">
+                  <Button 
+                    type="primary" 
+                    onClick={handleShowBasicAdminDashboard}
+                    className="mr-4"
+                  >
+                    Open Admin Dashboard
+                  </Button>
+                </RoleBasedRoute>
               </div>
             )}
             
             {userRole === 'Super Admin' && (
               <div className="mt-4">
-                <Button 
-                  type="primary" 
-                  onClick={handleShowSuperAdminDashboard}
-                  className="mr-4"
-                >
-                  Open Super Admin Dashboard
-                </Button>
+                <RoleBasedRoute requiredRole="Super Admin">
+                  <Button 
+                    type="primary" 
+                    onClick={handleShowSuperAdminDashboard}
+                    className="mr-4"
+                  >
+                    Open Super Admin Dashboard
+                  </Button>
+                </RoleBasedRoute>
               </div>
             )}
           </div>

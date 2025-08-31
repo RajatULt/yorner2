@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Calendar, Users, Utensils, Bed, Ship, Star } from 'lucide-react';
-import ReviewSystem from './ReviewSystem';
+import PDFExport from './PDFExport';
+import PassengerManagement from './PassengerManagement';
 import { Cruise } from '../data/cruises';
 
 interface CruiseModalProps {
@@ -13,7 +14,6 @@ interface CruiseModalProps {
 interface BookingForm {
   departureDate: string;
   roomType: string;
-  mealPlan: string;
   passengerCount: number;
   name: string;
   email: string;
@@ -23,7 +23,7 @@ interface BookingForm {
 
 const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuccess, isBooked = false }) => {
   // Booking flow state
-  const [currentStep, setCurrentStep] = useState<'details' | 'reviews' | 'selection' | 'booking-details' | 'confirmation'>(isBooked ? 'confirmation' : 'details');
+  const [currentStep, setCurrentStep] = useState<'details' | 'selection' | 'booking-details' | 'passengers' | 'confirmation'>(isBooked ? 'confirmation' : 'details');
   
   // Loading state
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,6 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
   const [bookingForm, setBookingForm] = useState<BookingForm>({
     departureDate: cruise.departureDates[0],
     roomType: cruise.roomTypes[0],
-    mealPlan: cruise.mealPlans[0],
     passengerCount: 2,
     name: '',
     email: '',
@@ -42,27 +41,19 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
 
   // Room type pricing multipliers
   const roomPricing = {
-    'Interior': 1.0,
-    'Ocean View': 1.3,
-    'Balcony': 1.6,
-    'Suite': 2.2,
-    'Penthouse': 3.0
-  };
-
-  // Meal plan pricing
-  const mealPricing = {
-    'All Inclusive': 5000,
-    'Premium Plus': 3000,
-    'Basic Plus': 1500
+    'Interior Cabin': 1.0,
+    'Ocean View Cabin': 1.3,
+    'Balcony Cabin': 1.6,
+    'Suite Cabin': 2.2,
+    'Penthouse Cabin': 3.0
   };
 
   // Calculate total price
   const calculateTotalPrice = () => {
     const basePrice = cruise.pricePerPerson;
     const roomMultiplier = roomPricing[bookingForm.roomType as keyof typeof roomPricing] || 1.0;
-    const mealPrice = mealPricing[bookingForm.mealPlan as keyof typeof mealPricing] || 0;
     
-    return (basePrice * roomMultiplier + mealPrice) * bookingForm.passengerCount;
+    return (basePrice * roomMultiplier) * bookingForm.passengerCount;
   };
 
   // Format price in Indian Rupees
@@ -172,14 +163,6 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                 Details
               </button>
               <button
-                onClick={() => setCurrentStep('reviews')}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                  currentStep === 'reviews' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
-                }`}
-              >
-                Reviews
-              </button>
-              <button
                 onClick={() => setCurrentStep('selection')}
                 className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                   currentStep === 'selection' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
@@ -245,26 +228,21 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
               
               {/* Action Button */}
               <div className="text-center">
+                <div className="flex gap-4 justify-center">
+                  <PDFExport
+                    data={cruise}
+                    filename={`${cruise.name.replace(/\s+/g, '_')}_Details.pdf`}
+                    title={`${cruise.name} - Cruise Details`}
+                    type="cruise"
+                  />
                 <button
                   onClick={() => setCurrentStep('selection')}
                   className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
                 >
                   Book This Cruise
                 </button>
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Reviews Tab */}
-          {currentStep === 'reviews' && (
-            <div>
-              <ReviewSystem
-                entityType="cruise"
-                entityId={cruise.id}
-                entityName={cruise.name}
-                canReview={true}
-                currentUserId="current-user"
-              />
             </div>
           )}
 
@@ -296,7 +274,7 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                   </div>
                   <div className="flex justify-between">
                     <span>Room Type:</span>
-                    <span>{bookingForm.roomType}</span>
+                    <span>{bookingForm.roomType.replace('Cabin', '')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Passengers:</span>
@@ -351,37 +329,23 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                     <Bed size={16} />
-                    Room Type
+                    Cabin Category
                   </label>
                   <select
                     value={bookingForm.roomType}
                     onChange={(e) => handleFormChange('roomType', e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {cruise.roomTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type} - {Math.round((roomPricing[type as keyof typeof roomPricing] || 1) * 100 - 100)}% {(roomPricing[type as keyof typeof roomPricing] || 1) > 1 ? 'premium' : 'standard'}
+                    {cruise.roomTypes.map((type) => {
+                      const cabinType = `${type} Cabin`;
+                      const multiplier = roomPricing[cabinType as keyof typeof roomPricing] || 1.0;
+                      const premium = Math.round((multiplier * 100) - 100);
+                      return (
+                      <option key={type} value={cabinType}>
+                        {cabinType} - {formatPrice(cruise.pricePerPerson * multiplier)} {premium > 0 ? `(+${premium}%)` : ''}
                       </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Meal Plan */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <Utensils size={16} />
-                    Meal Plan
-                  </label>
-                  <select
-                    value={bookingForm.mealPlan}
-                    onChange={(e) => handleFormChange('mealPlan', e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {cruise.mealPlans.map((plan) => (
-                      <option key={plan} value={plan}>
-                        {plan} - +{formatPrice(mealPricing[plan as keyof typeof mealPricing] || 0)}
-                      </option>
-                    ))}
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -420,11 +384,7 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                   </div>
                   <div className="flex justify-between">
                     <span>Room Type:</span>
-                    <span>{bookingForm.roomType}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Meal Plan:</span>
-                    <span>{bookingForm.mealPlan}</span>
+                    <span>{bookingForm.roomType.replace('Cabin', '')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Passengers:</span>
@@ -440,12 +400,26 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                 </div>
 
                 <button
-                  onClick={() => setCurrentStep('booking-details')}
+                  onClick={() => setCurrentStep('passengers')}
                   className="w-full mt-6 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg transition-colors duration-200 font-medium"
                 >
-                  Next: Passenger Details
+                  Next: Add Passengers
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Passengers Step */}
+          {currentStep === 'passengers' && !isBooked && (
+            <div>
+              <PassengerManagement
+                bookingId="temp"
+                onSave={(passengers) => {
+                  console.log('Passengers saved:', passengers);
+                  setCurrentStep('booking-details');
+                }}
+                onClose={() => setCurrentStep('selection')}
+              />
             </div>
           )}
 
@@ -456,10 +430,10 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
               <div className="lg:col-span-2 space-y-6">
                 <div className="flex items-center gap-4 mb-6">
                   <button
-                    onClick={() => setCurrentStep('selection')}
+                    onClick={() => setCurrentStep('passengers')}
                     className="text-blue-500 hover:text-blue-600 font-medium"
                   >
-                    ← Back to Selection
+                    ← Back to Passengers
                   </button>
                   <h3 className="text-xl font-semibold text-gray-800">Passenger Details</h3>
                 </div>
@@ -530,11 +504,7 @@ const CruiseModal: React.FC<CruiseModalProps> = ({ cruise, onClose, onBookingSuc
                   </div>
                   <div className="flex justify-between">
                     <span>Room Type:</span>
-                    <span>{bookingForm.roomType}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Meal Plan:</span>
-                    <span>{bookingForm.mealPlan}</span>
+                    <span>{bookingForm.roomType.replace('Cabin', '')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Passengers:</span>

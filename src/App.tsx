@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from './hooks/useAuth';
 import Dashboard from './components/Dashboard';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -11,8 +12,10 @@ import LoginPage from './components/LoginPage';
 import SignUpPage from './components/SignUpPage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'dashboard'>('home');
-  const [userRole, setUserRole] = useState<string>('');
+  const { user, isAuthenticated, logout } = useAuth();
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'dashboard'>(
+    isAuthenticated ? 'dashboard' : 'home'
+  );
 
   // Handle navigation
   const handleNavigation = (page: 'home' | 'login' | 'signup' | 'dashboard') => {
@@ -21,14 +24,13 @@ function App() {
 
   // Handle successful login
   const handleLoginSuccess = (role: string) => {
-    setUserRole(role);
     setCurrentPage('dashboard');
   };
 
   // Handle logout
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      setUserRole('');
+      logout();
       setCurrentPage('home');
     }
   };
@@ -43,7 +45,7 @@ function App() {
   }
 
   if (currentPage === 'dashboard') {
-    return <Dashboard userRole={userRole} onLogout={handleLogout} />;
+    return <Dashboard userRole={user?.role || 'Travel Agent'} onLogout={handleLogout} />;
   }
 
   return (

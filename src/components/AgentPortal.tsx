@@ -12,10 +12,11 @@ import {
   FileText,
   BarChart3,
   CheckCircle,
-  Star
+  Star,
+  Download
 } from 'lucide-react';
-import ReviewSystem from './ReviewSystem';
 import NotificationSystem from './NotificationSystem';
+import PDFExport from './PDFExport';
 
 interface AgentPortalProps {
   userRole: string;
@@ -131,7 +132,6 @@ const AgentPortal: React.FC<AgentPortalProps> = ({ userRole, onLogout, onBack })
           <div className="flex flex-wrap gap-2">
             {[
               { key: 'overview', label: 'Overview', icon: <BarChart3 size={18} /> },
-              { key: 'reviews', label: 'My Reviews', icon: <Star size={18} /> },
               { key: 'performance', label: 'Performance', icon: <TrendingUp size={18} /> }
             ].map(tab => (
               <button
@@ -301,7 +301,7 @@ const AgentPortal: React.FC<AgentPortalProps> = ({ userRole, onLogout, onBack })
                 onClick={() => handleQuickAction('Performance Report')}
                 className="w-full flex items-center gap-3 bg-teal-500 hover:bg-teal-600 text-white py-4 px-6 rounded-lg transition-colors duration-200 font-medium"
               >
-                <BarChart3 size={20} />
+                <Download size={20} />
                 <span>Performance Report</span>
               </button>
 
@@ -309,7 +309,7 @@ const AgentPortal: React.FC<AgentPortalProps> = ({ userRole, onLogout, onBack })
                 onClick={() => handleQuickAction('Commission History')}
                 className="w-full flex items-center gap-3 bg-purple-500 hover:bg-purple-600 text-white py-4 px-6 rounded-lg transition-colors duration-200 font-medium"
               >
-                <Award size={20} />
+                <FileText size={20} />
                 <span>Commission History</span>
               </button>
             </div>
@@ -326,19 +326,6 @@ const AgentPortal: React.FC<AgentPortalProps> = ({ userRole, onLogout, onBack })
             </div>
           </div>
         </div>
-        )}
-
-        {/* Reviews Tab */}
-        {activeTab === 'reviews' && (
-          <div>
-            <ReviewSystem
-              entityType="agent"
-              entityId="ag1"
-              entityName="John Smith"
-              canReview={false}
-              currentUserId="ag1"
-            />
-          </div>
         )}
 
         {/* Performance Tab */}

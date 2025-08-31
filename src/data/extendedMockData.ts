@@ -17,7 +17,6 @@ export const additionalCruises: Cruise[] = [
     amenities: ["Ice Skating", "Rock Climbing", "Mini Golf", "Spa", "Casino", "Theater", "Multiple Pools"],
     pricePerPerson: 85000,
     roomTypes: ["Interior", "Ocean View", "Balcony", "Suite", "Penthouse"],
-    mealPlans: ["All Inclusive", "Premium Plus", "Basic Plus"],
     description: "Adventure-packed cruise to the tropical paradise of Maldives with world-class entertainment.",
     shipType: "Adventure Ship",
     cruiseLine: "Royal Caribbean"
@@ -33,7 +32,6 @@ export const additionalCruises: Cruise[] = [
     amenities: ["FlowRider Surf", "Zip Line", "Carousel", "Aqua Theater", "Central Park", "Boardwalk"],
     pricePerPerson: 120000,
     roomTypes: ["Interior", "Ocean View", "Balcony", "Suite", "Penthouse", "Loft Suite"],
-    mealPlans: ["All Inclusive", "Premium Plus"],
     description: "The world's largest cruise ship offering unprecedented entertainment and dining experiences.",
     shipType: "Oasis Class",
     cruiseLine: "Royal Caribbean"
@@ -49,7 +47,6 @@ export const additionalCruises: Cruise[] = [
     amenities: ["Cultural Enrichment", "Cooking Classes", "Wine Tasting", "Spa", "Library", "Observatory"],
     pricePerPerson: 150000,
     roomTypes: ["Veranda", "Deluxe Veranda", "Penthouse Veranda", "Explorer Suite"],
-    mealPlans: ["All Inclusive"],
     description: "Cultural expedition cruise focusing on history, cuisine, and local traditions.",
     shipType: "Expedition Ship",
     cruiseLine: "Viking Ocean Cruises"
@@ -65,7 +62,6 @@ export const additionalCruises: Cruise[] = [
     amenities: ["SkyRide", "Ropes Course", "WaterWorks", "Serenity Deck", "Comedy Club"],
     pricePerPerson: 35000,
     roomTypes: ["Interior", "Ocean View", "Balcony"],
-    mealPlans: ["All Inclusive", "Basic Plus"],
     description: "Fun-filled short cruise perfect for families and first-time cruisers.",
     shipType: "Vista Class",
     cruiseLine: "Carnival Cruise Line"
@@ -81,7 +77,6 @@ export const additionalCruises: Cruise[] = [
     amenities: ["Butler Service", "All-Suite Accommodations", "Zagat-Rated Restaurants", "Spa", "Enrichment Programs"],
     pricePerPerson: 280000,
     roomTypes: ["Vista Suite", "Veranda Suite", "Silver Suite", "Royal Suite", "Grand Suite"],
-    mealPlans: ["All Inclusive"],
     description: "Ultra-luxury all-suite cruise with personalized service and gourmet dining.",
     shipType: "Ultra-Luxury",
     cruiseLine: "Silversea Cruises"

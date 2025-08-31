@@ -1,16 +1,21 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Mail, ArrowLeft, Anchor } from "lucide-react";
+import OTPModal from './OTPModal';
+import { useAuth } from '../hooks/useAuth';
 
 interface LoginPageProps {
   onNavigate: (page: "home" | "login" | "signup") => void;
-  onLoginSuccess: (role: string) => void;
+  onLoginSuccess: (user: any) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({
   onNavigate,
   onLoginSuccess,
 }) => {
+  const { login, sendOTP, otpRequired } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -55,7 +60,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Basic validation
@@ -64,19 +69,49 @@ const LoginPage: React.FC<LoginPageProps> = ({
       return;
     }
 
-    // Find matching demo credential
-    const matchedCredential = demoCredentials.find(
-      (cred) =>
-        cred.email === formData.email && cred.password === formData.password
-    );
+    setLoading(true);
+    
+    try {
+      const result = await login(formData);
+      
+      if (result.success) {
+        // Login successful
+        const matchedCredential = demoCredentials.find(cred => cred.email === formData.email);
+        if (matchedCredential) {
+          onLoginSuccess(matchedCredential.role);
+        }
+      } else if (result.requiresOTP) {
+        // Show OTP modal for agents
+        await sendOTP(formData.email);
+        setShowOTPModal(true);
+      } else {
+        alert(result.error || "Login failed");
+      }
+    } catch (error) {
+      alert("Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    if (matchedCredential) {
-      // Call the login success handler with the user role
-      onLoginSuccess(matchedCredential.role);
-    } else {
-      alert(
-        "Invalid credentials. Please use the demo credentials provided or check your email and password."
-      );
+  const handleOTPVerify = async (otp: string) => {
+    setLoading(true);
+    try {
+      const result = await login({ ...formData, otp });
+      
+      if (result.success) {
+        setShowOTPModal(false);
+        const matchedCredential = demoCredentials.find(cred => cred.email === formData.email);
+        if (matchedCredential) {
+          onLoginSuccess(matchedCredential.role);
+        }
+      } else {
+        alert(result.error || "OTP verification failed");
+      }
+    } catch (error) {
+      alert("OTP verification failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -241,9 +276,10 @@ const LoginPage: React.FC<LoginPageProps> = ({
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-teal-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-teal-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-500 to-teal-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-teal-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign In
+                {loading ? 'Signing In...' : 'Sign In'}
               </button>
             </form>
 
@@ -262,6 +298,15 @@ const LoginPage: React.FC<LoginPageProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* OTP Modal */}
+      <OTPModal
+        isOpen={showOTPModal}
+        email={formData.email}
+        onVerify={handleOTPVerify}
+        onClose={() => setShowOTPModal(false)}
+        onResendOTP={() => sendOTP(formData.email)}
+      />
     </div>
   );
 };
